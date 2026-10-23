@@ -1,66 +1,59 @@
 {% extends "base.html" %}
 
-{% block title %}
-Student Dashboard | QueueSathi
-{% endblock %}
+{% block title %}My Dashboard | QueueSathi{% endblock %}
 
 {% block content %}
 
-<div class="student-welcome">
+<section class="student-welcome">
 
     <div>
-        <h1>
-            Welcome, {{ g.student['username'] }}!
-        </h1>
-
-        <p>
-            Manage your queue tokens and campus services.
-        </p>
+        <span class="hero-badge">Student dashboard</span>
+        <h1>Welcome back, {{ g.student['username'] }}</h1>
+        <p>Manage your tokens and check your place in line.</p>
     </div>
 
-</div>
+    <div class="welcome-stats">
+        <div class="mini-stat">
+            <strong>{{ active_tokens|length }}</strong>
+            <span>Active</span>
+        </div>
+        <div class="mini-stat">
+            <strong>{{ history|length }}</strong>
+            <span>Past</span>
+        </div>
+    </div>
+
+</section>
 
 
 <section class="card">
 
-    <h2>Select a Service</h2>
+    <div class="section-heading">
+        <div>
+            <h2>Get a new token</h2>
+            <p class="muted">Choose a service to join its queue.</p>
+        </div>
+    </div>
 
-    <p class="muted">
-        Choose the service you want to join.
-    </p>
+    <form method="POST"
+          action="{{ url_for('customer.join_queue') }}"
+          class="join-row">
 
-    <form
-        method="POST"
-        action="{{ url_for('customer.join_queue') }}"
-    >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-        <input
-            type="hidden"
-            name="csrf_token"
-            value="{{ csrf_token() }}"
-        >
+        <div class="join-field">
+            <label for="service-select">Service</label>
+            <select id="service-select" name="service_id" required>
+                <option value="">Choose a service</option>
+                {% for service in services %}
+                    <option value="{{ service['id'] }}">
+                        {{ service['service_name'] }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
 
-            <label for="service-select">Select Service</label>
-
-        <select id="service-select" name="service_id" required>
-
-            <option value="">
-                Choose a service
-            </option>
-
-            {% for service in services %}
-
-            <option value="{{ service['id'] }}">
-                {{ service['service_name'] }}
-            </option>
-
-            {% endfor %}
-
-        </select>
-
-        <button class="btn btn-primary">
-            Generate Token
-        </button>
+        <button type="submit" class="btn btn-primary">Generate token</button>
 
     </form>
 
@@ -69,164 +62,131 @@ Student Dashboard | QueueSathi
 
 <section class="dashboard-section">
 
-    <h2>My Active Tokens</h2>
+    <div class="section-heading">
+        <div>
+            <h2>My active tokens</h2>
+            <p class="muted">Tokens that are waiting, called, serving, or on hold.</p>
+        </div>
+    </div>
 
     {% if active_tokens %}
 
-    <div class="student-token-grid">
+        <div class="student-token-grid">
 
-        {% for item in active_tokens %}
+            {% for item in active_tokens %}
 
-        {% set token = item.token %}
-        {% set estimate = item.estimate %}
+                {% set token = item.token %}
+                {% set estimate = item.estimate %}
 
-        <div class="card student-token-card">
+                <article class="card student-token-card">
 
-            <p class="muted">
-                {{ token['service_name'] }}
-            </p>
+                    <p class="muted">{{ token['service_name'] }}</p>
 
-            <h2 class="my-token-number">
-                {{ token['token_number'] }}
-            </h2>
+                    <h3 class="my-token-number">{{ token['token_number'] }}</h3>
 
-            <span class="status-badge">
-                {{ token['status'] }}
-            </span>
+                    <span class="status-badge status-{{ token['status']|lower }}">
+                        {{ token['status'] }}
+                    </span>
 
-            <div class="student-token-details">
+                    <div class="student-token-details">
+                        <p>
+                            <span>People ahead</span>
+                            <strong>{{ estimate['people_ahead'] }}</strong>
+                        </p>
+                        <p>
+                            <span>Estimated wait</span>
+                            <strong>
+                                {% if estimate['estimated_minutes'] is none %}
+                                    Unavailable
+                                {% else %}
+                                    {{ estimate['estimated_minutes'] }} min
+                                {% endif %}
+                            </strong>
+                        </p>
+                    </div>
 
-                <p>
-                    People Ahead:
+                    <div class="card-actions">
 
-                    <strong>
-                        {{ estimate['people_ahead'] }}
-                    </strong>
-                </p>
+                        <a class="btn btn-primary"
+                           href="{{ url_for('customer.token_status', public_id=token['public_id']) }}">
+                            Track token
+                        </a>
 
-                <p>
-                    Estimated Wait:
+                        {% if token['status'] == 'WAITING' %}
 
-                    <strong>
-                        {% if estimate['estimated_minutes'] is none %}
-                            Unavailable
-                        {% else %}
-                            {{ estimate['estimated_minutes'] }} min
+                            <form method="POST"
+                                  action="{{ url_for('customer.cancel_token', public_id=token['public_id']) }}">
+
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                                <button type="submit"
+                                        class="btn btn-danger"
+                                        onclick="return confirm('Cancel this token?')">
+                                    Cancel
+                                </button>
+
+                            </form>
+
                         {% endif %}
-                    </strong>
-                </p>
 
-            </div>
+                    </div>
 
-            <a href="{{ url_for('customer.token_status', public_id=token['public_id']) }}"
-   class="btn btn-primary">
+                </article>
 
-    Track Token
-
-</a>
-
-            {% if token['status'] == 'WAITING' %}
-
-            <form
-                method="POST"
-                action="{{ url_for(
-                    'customer.cancel_token',
-                    public_id=token['public_id']
-                ) }}"
-            >
-
-                <input
-                    type="hidden"
-                    name="csrf_token"
-                    value="{{ csrf_token() }}"
-                >
-
-                <button
-                    class="btn btn-danger"
-                    onclick="return confirm('Cancel this token?')"
-                >
-                    Cancel Token
-                </button>
-
-            </form>
-
-            {% endif %}
+            {% endfor %}
 
         </div>
 
-        {% endfor %}
-
-    </div>
-
     {% else %}
 
-    <div class="card">
-
-        <p>
-            You do not have any active tokens.
-        </p>
-
-        <p class="muted">
-            Select a service above to generate your first token.
-        </p>
-
-    </div>
+        <div class="card empty-state">
+            <span class="empty-icon" aria-hidden="true">🎟️</span>
+            <p><strong>You have no active tokens.</strong></p>
+            <p class="muted">Choose a service above to get your first token.</p>
+        </div>
 
     {% endif %}
 
 </section>
 
 
-<section class="card">
+<section class="dashboard-section">
 
-    <h2>Token History</h2>
+    <div class="section-heading">
+        <div>
+            <h2>Token history</h2>
+            <p class="muted">Completed, cancelled, and missed tokens.</p>
+        </div>
+    </div>
 
     <div class="table-wrapper">
-
         <table>
-
+            <caption class="visually-hidden">Your past tokens</caption>
             <thead>
                 <tr>
-                    <th>Token</th>
-                    <th>Service</th>
-                    <th>Status</th>
+                    <th scope="col">Token</th>
+                    <th scope="col">Service</th>
+                    <th scope="col">Status</th>
                 </tr>
             </thead>
-
             <tbody>
-
                 {% for token in history %}
-
                 <tr>
-
+                    <td><strong>{{ token['token_number'] }}</strong></td>
+                    <td>{{ token['service_name'] }}</td>
                     <td>
-                        {{ token['token_number'] }}
+                        <span class="status-badge status-{{ token['status']|lower }}">
+                            {{ token['status'] }}
+                        </span>
                     </td>
-
-                    <td>
-                        {{ token['service_name'] }}
-                    </td>
-
-                    <td>
-                        {{ token['status'] }}
-                    </td>
-
                 </tr>
-
                 {% else %}
-
                 <tr>
-                    <td colspan="3">
-                        No previous tokens.
-                    </td>
+                    <td colspan="3">No previous tokens yet.</td>
                 </tr>
-
                 {% endfor %}
-
             </tbody>
-
         </table>
-
     </div>
 
 </section>
