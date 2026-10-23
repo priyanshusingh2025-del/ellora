@@ -1,151 +1,133 @@
 {% extends "base.html" %}
 
-{% block title %}Manage Services | Ellora{% endblock %}
+{% block title %}Manage Services | QueueSathi{% endblock %}
 
 {% block content %}
 
 <div class="page-heading">
-
-    <h1>Service Management</h1>
-
-    <p>
-        Create services and control their availability.
-    </p>
-
+    <span class="hero-badge">Administrator</span>
+    <h1>Service management</h1>
+    <p>Create services, rename them, and open or close each counter.</p>
 </div>
+
 
 <section class="card">
 
-    <h2>Add New Service</h2>
+    <h2>Add a new service</h2>
 
     <form method="POST"
-          action="{{ url_for('admin.add_service') }}">
+          action="{{ url_for('admin.add_service') }}"
+          class="form-grid">
 
-        <input type="hidden"
-               name="csrf_token"
-               value="{{ csrf_token() }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-        <label for="new-service-name">Service Name</label>
+        <div>
+            <label for="new-service-name">Service name</label>
+            <input id="new-service-name"
+                   name="service_name"
+                   placeholder="Library Help Desk"
+                   required>
+        </div>
 
-        <input id="new-service-name"
-               name="service_name"
-               placeholder="Library Help Desk"
-               required>
+        <div>
+            <label for="new-service-code">Service code</label>
+            <input id="new-service-code"
+                   name="service_code"
+                   placeholder="LIB"
+                   maxlength="10"
+                   required>
+        </div>
 
-        <label for="new-service-code">Service Code</label>
-
-        <input id="new-service-code"
-               name="service_code"
-               placeholder="LIB"
-               maxlength="10"
-               required>
-
-
-        <button class="btn btn-primary">
-            Add Service
-        </button>
+        <button type="submit" class="btn btn-primary">Add service</button>
 
     </form>
 
+    <p class="field-hint">
+        The code is used in token numbers, for example LIB-0001.
+        Use letters and numbers only.
+    </p>
+
 </section>
+
 
 <section class="card">
 
-    <h2>Existing Services</h2>
+    <h2>Existing services</h2>
 
     <div class="table-wrapper">
-
         <table>
-
+            <caption class="visually-hidden">All configured services</caption>
             <thead>
                 <tr>
-                    <th>Code</th>
-                    <th>Service</th>
-                    <th>Status</th>
-                    <th>Rename</th>
-                    <th>Action</th>
+                    <th scope="col">Code</th>
+                    <th scope="col">Service</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Rename</th>
+                    <th scope="col">Availability</th>
                 </tr>
             </thead>
-
             <tbody>
 
                 {% for service in services %}
-
                 <tr>
 
-                    <td>
-                        {{ service['service_code'] }}
-                    </td>
+                    <td><span class="code-chip">{{ service['service_code'] }}</span></td>
 
-                    <td>
-                        {{ service['service_name'] }}
-                    </td>
+                    <td>{{ service['service_name'] }}</td>
 
                     <td>
                         {% if service['is_open'] %}
-                            Open
+                            <span class="status-badge status-serving">Open</span>
                         {% else %}
-                            Closed
+                            <span class="status-badge status-cancelled">Closed</span>
                         {% endif %}
                     </td>
 
                     <td>
-
                         <form method="POST"
-                              action="{{ url_for(
-                                  'admin.rename_service',
-                                  service_id=service['id']
-                              ) }}">
+                              action="{{ url_for('admin.rename_service', service_id=service['id']) }}"
+                              class="rename-form">
 
-                            <input type="hidden"
-                                   name="csrf_token"
-                                   value="{{ csrf_token() }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-                            <input name="service_name"
+                            <label class="visually-hidden"
+                                   for="rename-{{ service['id'] }}">
+                                New name for {{ service['service_name'] }}
+                            </label>
+
+                            <input id="rename-{{ service['id'] }}"
+                                   name="service_name"
                                    value="{{ service['service_name'] }}"
-                                   aria-label="New name for {{ service['service_name'] }}"
                                    required>
 
-                            <button class="btn btn-small">
+                            <button type="submit" class="btn btn-small btn-secondary">
                                 Save
                             </button>
-
                         </form>
-
                     </td>
 
                     <td>
-
                         <form method="POST"
-                              action="{{ url_for(
-                                  'admin.toggle_service',
-                                  service_id=service['id']
-                              ) }}">
+                              action="{{ url_for('admin.toggle_service', service_id=service['id']) }}">
 
-                            <input type="hidden"
-                                   name="csrf_token"
-                                   value="{{ csrf_token() }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-                            <button class="btn btn-small btn-secondary">
-                                {% if service['is_open'] %}
-                                    Close
-                                {% else %}
-                                    Open
-                                {% endif %}
+                            <button type="submit"
+                                    class="btn btn-small {% if service['is_open'] %}btn-danger{% else %}btn-primary{% endif %}">
+                                {% if service['is_open'] %}Close service{% else %}Open service{% endif %}
                             </button>
-
                         </form>
-
                     </td>
 
                 </tr>
-
+                {% else %}
+                <tr>
+                    <td colspan="5">No services yet.</td>
+                </tr>
                 {% endfor %}
 
             </tbody>
-
         </table>
-
     </div>
 
 </section>
