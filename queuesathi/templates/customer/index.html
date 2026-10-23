@@ -1,59 +1,46 @@
 {% extends "base.html" %}
 
-{% block title %}
-Select Service | QueueSathi
-{% endblock %}
+{% block title %}Choose a Service | QueueSathi{% endblock %}
 
 {% block content %}
 
 <div class="page-heading">
-
-    <h1>Select a Campus Service</h1>
-
-    <p>
-        Choose the service you want to join.
-    </p>
-
+    <span class="hero-badge">Campus services</span>
+    <h1>Choose a service</h1>
+    <p>Get a token for the counter you need. You can track it from your dashboard.</p>
 </div>
 
 <div class="service-grid">
 
     {% for service in services %}
 
-    <div class="card service-card">
+        <article class="service-card">
 
-        <h2>
-            {{ service['service_name'] }}
-        </h2>
+            <span class="service-icon" aria-hidden="true">
+                {{ service['service_code'] }}
+            </span>
 
-        <p>
-            Generate your digital queue token.
-        </p>
+            <h2>{{ service['service_name'] }}</h2>
 
-        <form
-            method="POST"
-            action="{{ url_for('customer.join_queue') }}"
-        >
+            <p class="muted">Open now</p>
 
-            <input
-                type="hidden"
-                name="csrf_token"
-                value="{{ csrf_token() }}"
-            >
+            <form method="POST" action="{{ url_for('customer.join_queue') }}">
 
-            <input
-                type="hidden"
-                name="service_id"
-                value="{{ service['id'] }}"
-            >
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="service_id" value="{{ service['id'] }}">
 
-            <button class="btn btn-primary">
-                Get Token
-            </button>
+                <button type="submit" class="btn btn-primary">Get token</button>
 
-        </form>
+            </form>
 
-    </div>
+        </article>
+
+    {% else %}
+
+        <div class="card empty-state">
+            <span class="empty-icon" aria-hidden="true">🏢</span>
+            <p>No services are open right now.</p>
+        </div>
 
     {% endfor %}
 
