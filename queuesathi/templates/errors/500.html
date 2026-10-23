@@ -1,18 +1,17 @@
 {% extends "base.html" %}
 
+{% block title %}Server Error | QueueSathi{% endblock %}
+
 {% block content %}
 
-<section class="card">
-
-    <h1>Server Error</h1>
-
-    <p>Something went wrong. Please contact the service counter.</p>
-
-    <a href="{{ url_for('customer.index') }}"
-       class="btn btn-primary">
-        Return Home
-    </a>
-
+<section class="card error-card">
+    <p class="error-code">500</p>
+    <h1>Something went wrong</h1>
+    <p class="muted">
+        Please try again in a moment. If the problem continues,
+        ask the service counter for help.
+    </p>
+    <a href="{{ url_for('customer.index') }}" class="btn btn-primary">Return home</a>
 </section>
 
 {% endblock %}
