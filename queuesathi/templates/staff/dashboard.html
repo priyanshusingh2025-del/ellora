@@ -71,9 +71,9 @@ Staff Dashboard | QueueSathi
                 value="{{ csrf_token() }}"
             >
 
-            <label>Select Service</label>
+            <label for="call-service">Select Service</label>
 
-            <select name="service_id" required>
+            <select id="call-service" name="service_id" required>
 
                 {% for service in services %}
 
@@ -108,10 +108,10 @@ Staff Dashboard | QueueSathi
                 name="csrf_token"
                 value="{{ csrf_token() }}"
             >
+            <label for="walkin-service">Select Service</label>
 
-            <label>Select Service</label>
+            <select id="walkin-service" name="service_id" required>
 
-            <select name="service_id" required>
 
                 {% for service in services %}
 
