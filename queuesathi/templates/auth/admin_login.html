@@ -26,24 +26,21 @@ Administrator Login | QueueSathi
                    name="csrf_token"
                    value="{{ csrf_token() }}">
 
-            <label>Admin Username</label>
+                        <label for="username">Admin Username</label>
 
-            <input
-                type="text"
-                name="username"
-                autocomplete="username"
-                required
-            >
+            <input id="username"
+                   type="text"
+                   name="username"
+                   autocomplete="username"
+                   required>
 
-            <label>Password</label>
+            <label for="password">Password</label>
 
-            <input
-                type="password"
-                name="password"
-                autocomplete="current-password"
-                required
-            >
-
+            <input id="password"
+                   type="password"
+                   name="password"
+                   autocomplete="current-password"
+                   required>
             <button class="btn btn-primary auth-button">
                 Admin Login
             </button>
