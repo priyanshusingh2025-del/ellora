@@ -1,50 +1,40 @@
 {% extends "base.html" %}
 
-{% block title %}
-Staff Login | QueueSathi
-{% endblock %}
+{% block title %}Staff Login | QueueSathi{% endblock %}
 
 {% block content %}
 
-<div class="page-heading">
-
-    <h1>Staff Login</h1>
-
-    <p>
-        Select your assigned service department.
-    </p>
-
+<div class="page-heading centered">
+    <span class="hero-badge">Staff access</span>
+    <h1>Choose your department</h1>
+    <p>Sign in to the queue you are assigned to.</p>
 </div>
 
 <div class="service-grid">
 
     {% for service in services %}
 
-    <a
-        href="{{ url_for(
-            'auth.staff_login',
-            service_code=service['service_code']
-        ) }}"
-        class="service-card"
-    >
+        <a class="service-card"
+           href="{{ url_for('auth.staff_login', service_code=service['service_code']) }}">
 
-        <div class="service-icon">
-            {{ service['service_code'] }}
+            <span class="service-icon" aria-hidden="true">
+                {{ service['service_code'] }}
+            </span>
+
+            <h2>{{ service['service_name'] }}</h2>
+
+            <p class="muted">Manage the waiting list for this counter.</p>
+
+            <span class="service-link">Staff login →</span>
+
+        </a>
+
+    {% else %}
+
+        <div class="card empty-state">
+            <span class="empty-icon" aria-hidden="true">🏢</span>
+            <p>No departments have been configured yet.</p>
         </div>
-
-        <h2>
-            {{ service['service_name'] }}
-        </h2>
-        
-        <p>
-            Login to manage this service queue.
-        </p>
-
-        <span class="service-link">
-            Staff Login →
-        </span>
-
-    </a>
 
     {% endfor %}
 
