@@ -28,18 +28,20 @@ Student Login | QueueSathi
             <input type="hidden"
                    name="csrf_token"
                    value="{{ csrf_token() }}">
+            
+            <label for="username">Username</label>
 
-            <label>Username</label>
-
-            <input type="text"
+            <input id="username"
+                   type="text"
                    name="username"
                    placeholder="Enter your username"
                    autocomplete="username"
                    required>
 
-            <label>Password</label>
+            <label for="password">Password</label>
 
-            <input type="password"
+            <input id="password"
+                   type="password"
                    name="password"
                    placeholder="Enter your password"
                    autocomplete="current-password"
