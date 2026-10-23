@@ -1,32 +1,24 @@
 {% extends "base.html" %}
 
-{% block title %}
-Student Registration | QueueSathi
-{% endblock %}
+{% block title %}Create Account | QueueSathi{% endblock %}
 
 {% block content %}
 
-<div class="auth-container">
+<div class="auth-narrow">
 
-    <div class="auth-header">
-        <h1>Create Student Account</h1>
+    <section class="card auth-card">
 
-        <p>
-            Register to generate and track queue tokens.
-        </p>
-    </div>
-
-    <div class="card auth-card">
+        <div class="auth-header">
+            <span class="hero-badge">New student</span>
+            <h1>Create your account</h1>
+            <p>Register to generate and track queue tokens.</p>
+        </div>
 
         <form method="POST">
 
-            <input type="hidden"
-                   name="csrf_token"
-                   value="{{ csrf_token() }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-        
             <label for="username">Username</label>
-
             <input id="username"
                    type="text"
                    name="username"
@@ -35,16 +27,16 @@ Student Registration | QueueSathi
                    required>
 
             <label for="password">Password</label>
-
             <input id="password"
                    type="password"
                    name="password"
                    minlength="8"
                    autocomplete="new-password"
+                   aria-describedby="password-hint"
                    required>
+            <p id="password-hint" class="field-hint">At least 8 characters.</p>
 
-            <label for="confirm_password">Confirm Password</label>
-
+            <label for="confirm_password">Confirm password</label>
             <input id="confirm_password"
                    type="password"
                    name="confirm_password"
@@ -52,21 +44,18 @@ Student Registration | QueueSathi
                    autocomplete="new-password"
                    required>
 
-            <button class="btn btn-primary auth-button">
-                Create Account
+            <button type="submit" class="btn btn-primary auth-button">
+                Create account
             </button>
 
         </form>
 
         <p class="auth-footer">
             Already registered?
-
-            <a href="{{ url_for('auth.student_login') }}">
-                Login
-            </a>
+            <a href="{{ url_for('auth.student_login') }}">Login</a>
         </p>
 
-    </div>
+    </section>
 
 </div>
 
