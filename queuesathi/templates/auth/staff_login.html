@@ -1,35 +1,24 @@
 {% extends "base.html" %}
 
-{% block title %}
-{{ service['service_name'] }} Staff Login
-{% endblock %}
+{% block title %}{{ service['service_name'] }} Staff Login | QueueSathi{% endblock %}
 
 {% block content %}
 
-<div class="auth-container">
+<div class="auth-narrow">
 
-    <div class="auth-header">
+    <section class="card auth-card">
 
-        <h1>
-            {{ service['service_name'] }}
-        </h1>
-
-        <p>
-            Staff Login
-        </p>
-
-    </div>
-
-    <div class="card auth-card">
+        <div class="auth-header">
+            <span class="hero-badge">Staff · {{ service['service_code'] }}</span>
+            <h1>{{ service['service_name'] }}</h1>
+            <p>Sign in with your department account.</p>
+        </div>
 
         <form method="POST">
 
-            <input type="hidden"
-                   name="csrf_token"
-                   value="{{ csrf_token() }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-            <label for="username">Staff Username</label>
-
+            <label for="username">Staff username</label>
             <input id="username"
                    type="text"
                    name="username"
@@ -37,28 +26,23 @@
                    required>
 
             <label for="password">Password</label>
-
             <input id="password"
                    type="password"
                    name="password"
                    autocomplete="current-password"
                    required>
 
-            <button class="btn btn-primary auth-button">
-                Login to Dashboard
+            <button type="submit" class="btn btn-primary auth-button">
+                Login to dashboard
             </button>
 
         </form>
 
         <p class="auth-footer">
-
-            <a href="{{ url_for('auth.staff_select') }}">
-                ← Choose Another Department
-            </a>
-
+            <a href="{{ url_for('auth.staff_select') }}">← Choose another department</a>
         </p>
 
-    </div>
+    </section>
 
 </div>
 
