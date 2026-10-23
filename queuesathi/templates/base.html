@@ -3,89 +3,68 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}QueueSathi - Smart Queue Management{% endblock %}</title>
 
-    <title>
-        {% block title %}QueueSathi{% endblock %}
-    </title>
+    <meta name="description"
+          content="{% block description %}QueueSathi is a smart digital queue system for campus services. Take a token online, track your place in the queue, and see an estimated waiting time.{% endblock %}">
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css') }}">
+    <meta name="theme-color" content="#2563eb">
+
+    <!-- Link previews (WhatsApp, Telegram, etc.) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="QueueSathi - Smart Queue Management">
+    <meta property="og:description"
+          content="Join campus service queues digitally, track your token, and see your estimated wait.">
+
+    <!-- Inline favicon: avoids a /favicon.ico 404 request on every page -->
+    <link rel="icon"
+          href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232563eb'/%3E%3Ctext x='32' y='44' font-size='36' font-family='Arial' font-weight='bold' text-anchor='middle' fill='white'%3EQ%3C/text%3E%3C/svg%3E">
+
+    <link rel="stylesheet" href="{{ static_url('css/style.css') }}">
 </head>
 
 <body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
 
 <header class="navbar">
 
     <div class="container nav-content">
 
-        <a href="{{ url_for('customer.index') }}"
-           class="brand">
+        <a href="{{ url_for('customer.index') }}" class="brand">
             Queue<span>Sathi</span>
         </a>
 
-        <nav>
+        <nav aria-label="Main navigation">
 
             {% if g.student %}
 
-                <!-- STUDENT NAVIGATION -->
-
-                <a href="{{ url_for('customer.dashboard') }}">
-                    My Dashboard
-                </a>
-
-                <a href="{{ url_for('customer.services') }}">
-                    Services
-                </a>
+                <a href="{{ url_for('customer.dashboard') }}">My Dashboard</a>
+                <a href="{{ url_for('customer.services') }}">Services</a>
 
             {% elif g.user %}
 
-                <!-- STAFF NAVIGATION -->
-
                 {% if g.user['role'] == 'STAFF' %}
 
-                    <a href="{{ url_for('staff.dashboard') }}">
-                        Staff Dashboard
-                    </a>
+                    <a href="{{ url_for('staff.dashboard') }}">Staff Dashboard</a>
 
                 {% elif g.user['role'] == 'ADMIN' %}
 
-                    <!-- ADMIN NAVIGATION -->
-
-                    <a href="{{ url_for('admin.services') }}">
-                        Manage Services
-                    </a>
-
-                    <a href="{{ url_for('admin.reports') }}">
-                        Reports
-                    </a>
-
-                    <a href="{{ url_for('staff.dashboard') }}">
-                        Queue Overview
-                    </a>
+                    <a href="{{ url_for('admin.services') }}">Manage Services</a>
+                    <a href="{{ url_for('admin.reports') }}">Reports</a>
+                    <a href="{{ url_for('staff.dashboard') }}">Queue Overview</a>
 
                 {% endif %}
 
             {% else %}
 
-                <!-- PUBLIC NAVIGATION -->
-
-                <a href="{{ url_for('auth.student_login') }}">
-                    Student Login
-                </a>
-
-                <a href="{{ url_for('auth.staff_select') }}">
-                    Staff Login
-                </a>
-
-                <a href="{{ url_for('auth.admin_login') }}">
-                    Admin Login
-                </a>
+                <a href="{{ url_for('auth.student_login') }}">Student Login</a>
+                <a href="{{ url_for('auth.staff_select') }}">Staff Login</a>
+                <a href="{{ url_for('auth.admin_login') }}">Admin Login</a>
 
             {% endif %}
-
 
             {% if g.student or g.user %}
 
@@ -93,14 +72,9 @@
                       action="{{ url_for('auth.logout') }}"
                       class="inline-form">
 
-                    <input type="hidden"
-                           name="csrf_token"
-                           value="{{ csrf_token() }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-                    <button type="submit"
-                            class="nav-button">
-                        Logout
-                    </button>
+                    <button type="submit" class="nav-button">Logout</button>
 
                 </form>
 
@@ -113,18 +87,15 @@
 </header>
 
 
-<main class="container page-content">
+<main id="main-content" class="container page-content">
 
     {% with messages = get_flashed_messages(with_categories=true) %}
-
         {% for category, message in messages %}
-
-            <div class="alert {{ category }}">
+            <div class="alert {{ category }}"
+                 role="{{ 'alert' if category == 'error' else 'status' }}">
                 {{ message }}
             </div>
-
         {% endfor %}
-
     {% endwith %}
 
     {% block content %}{% endblock %}
@@ -133,14 +104,10 @@
 
 
 <footer class="footer">
-
     <div class="container">
-        QueueSathi © 2026 |
-        Smart Digital Queue Management System
+        QueueSathi © 2026 | Smart Digital Queue Management System
     </div>
-
 </footer>
-
 
 {% block scripts %}{% endblock %}
 

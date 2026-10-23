@@ -24,6 +24,3 @@ class Config:
     SESSION_COOKIE_SECURE = os.getenv("RENDER") == "true"
 
     WTF_CSRF_ENABLED = True
-        # Browsers cache CSS/JS for 1 year. This is safe because static_url()
-    # adds a version number that changes whenever a file changes.
-    SEND_FILE_MAX_AGE_DEFAULT = 31536000

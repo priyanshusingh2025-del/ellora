@@ -16,6 +16,11 @@ from ..reports import get_statistics
 
 admin_bp = Blueprint("admin", __name__)
 
+@admin_bp.get("/admin")
+@role_required("ADMIN")
+def home():
+    return redirect(url_for("admin.services"))
+
 
 @admin_bp.get("/admin/services")
 @role_required("ADMIN")

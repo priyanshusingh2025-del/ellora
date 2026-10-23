@@ -1,7 +1,6 @@
-psycopg[binary,pool]>=3.1,<4.0
-pytest>=8.0
 Flask>=3.0,<4.0
 Flask-WTF>=1.2,<2.0
-Flask-Compress>=1.15,<2.0
 python-dotenv>=1.0,<2.0
-gunicorn>=22.0,<24.0
+psycopg[binary,pool]>=3.1,<4.0
+gunicorn>=22.0
+pytest>=8.0

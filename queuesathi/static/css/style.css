@@ -656,3 +656,62 @@ th {
     }
 
 }
+
+/* ===================================
+   ACCESSIBILITY & CONTRAST FIXES
+=================================== */
+
+:root {
+    --muted: #475569;
+    --danger: #b91c1c;
+}
+
+.auth-header p,
+.student-welcome p,
+.page-heading p,
+.feature-card p {
+    color: #475569;
+}
+
+.hero-badge,
+.service-icon {
+    color: #1d4ed8;
+}
+
+/* Links inside text must not rely on colour alone */
+.auth-footer a,
+.card p a {
+    text-decoration: underline;
+}
+
+/* Clear focus outline for keyboard users */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 3px solid #1d4ed8;
+    outline-offset: 2px;
+}
+
+/* Larger tap targets for small buttons on phones */
+.btn-small {
+    min-height: 36px;
+}
+
+/* "Skip to main content" link: hidden until focused with Tab */
+.skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+}
+
+.skip-link:focus {
+    left: 16px;
+    top: 16px;
+    z-index: 1000;
+    padding: 10px 16px;
+    border-radius: 8px;
+    background: #0f172a;
+    color: #ffffff;
+    font-weight: 700;
+}

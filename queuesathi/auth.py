@@ -31,7 +31,7 @@ def load_current_account():
     # Static files and the health check never need the logged-in account.
     if request.endpoint in ("static", "health_check"):
         return
-    
+
     user_id = session.get("user_id")
     student_id = session.get("student_id")
 

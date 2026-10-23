@@ -1,63 +1,49 @@
 import os
 
 import click
-from flask import Flask, jsonify, render_template, request, url_for, g
-from flask_compress import Compress
+
+from flask import Flask, render_template, url_for, g, request
 from flask_wtf.csrf import CSRFProtect
 
 from .config import Config
 from .db import init_app, init_db
-from .setup_data import seed_defaults
-
 
 csrf = CSRFProtect()
-compress = Compress()
 
 
-def default_database_path(app):
-    # 1. An explicit path, such as a Render persistent disk.
-    configured = os.environ.get("DATABASE_PATH")
+def create_app(test_config=None):
+    app = Flask(__name__, instance_relative_config=True)
 
-    if configured:
-        return configured
+    app.config.from_object(Config)
 
-    # 2. Local development: instance/queuesathi.sqlite3
-    return os.path.join(
+    app.config["DATABASE"] = os.path.join(
         app.instance_path,
         "queuesathi.sqlite3"
     )
 
-
-def create_app(test_config=None):
-    app = Flask(
-        __name__,
-        instance_relative_config=True
-    )
-
-    app.config.from_object(Config)
-
-    app.config["DATABASE"] = default_database_path(app)
-
     if test_config:
         app.config.update(test_config)
+
+    if os.getenv("VERCEL") == "1" and not app.config.get("DATABASE_URL"):
+        raise RuntimeError(
+            "Set DATABASE_URL or POSTGRES_URL to a persistent PostgreSQL "
+            "database on Vercel."
+        )
 
     if not app.config.get("SECRET_KEY"):
         if app.config.get("TESTING"):
             app.config["SECRET_KEY"] = "testing-only-secret"
-
         else:
             raise RuntimeError(
-                "SECRET_KEY is missing. Add it to your local .env "
-                "file or to the Render environment variables."
+                "SECRET_KEY is missing. Set it in .env or in Vercel environment variables."
             )
 
-    database_folder = os.path.dirname(app.config["DATABASE"])
-
-    if database_folder:
-        os.makedirs(database_folder, exist_ok=True)
+    # The instance folder is only needed for local SQLite.
+    # On Vercel the filesystem is read-only, so do not create it there.
+    if not app.config.get("DATABASE_URL"):
+        os.makedirs(app.instance_path, exist_ok=True)
 
     csrf.init_app(app)
-    compress.init_app(app)   # gzip compression for HTML, CSS, JS, JSON
 
     init_app(app)
 
@@ -108,37 +94,10 @@ def create_app(test_config=None):
 
         return response
 
-    if not app.config.get("TESTING"):
-        with app.app_context():
-            init_db()
-            seed_defaults()
-
     @app.cli.command("init-db")
     def initialize_database():
         init_db()
         click.echo("QueueSathi database initialized.")
-
-    # Lightweight health check for Render and uptime monitors.
-    # It does not touch the database.
-    @app.get("/healthz")
-    def healthz():
-        return jsonify({"status": "ok"})
-
-    # Cache policy:
-    # - Static CSS/JS/images: cacheable by browsers for one hour.
-    # - Everything else (student, staff, admin pages, JSON):
-    #   never stored, so private queue data is not shown from cache.
-    @app.after_request
-    def set_cache_policy(response):
-        if request.endpoint == "static":
-            response.cache_control.public = True
-            response.cache_control.max_age = 3600
-
-        else:
-            response.cache_control.no_store = True
-            response.cache_control.private = True
-
-        return response
 
     @app.errorhandler(403)
     def forbidden(error):
