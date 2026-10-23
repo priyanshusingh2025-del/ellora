@@ -1,33 +1,24 @@
 {% extends "base.html" %}
 
-{% block title %}
-Administrator Login | QueueSathi
-{% endblock %}
+{% block title %}Administrator Login | QueueSathi{% endblock %}
 
 {% block content %}
 
-<div class="auth-container">
+<div class="auth-narrow">
 
-    <div class="auth-header">
+    <section class="card auth-card">
 
-        <h1>Administrator Login</h1>
-
-        <p>
-            Authorized administrators only.
-        </p>
-
-    </div>
-
-    <div class="card auth-card">
+        <div class="auth-header">
+            <span class="hero-badge hero-danger">Restricted area</span>
+            <h1>Administrator</h1>
+            <p>Authorized administrators only.</p>
+        </div>
 
         <form method="POST">
 
-            <input type="hidden"
-                   name="csrf_token"
-                   value="{{ csrf_token() }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-                        <label for="username">Admin Username</label>
-
+            <label for="username">Admin username</label>
             <input id="username"
                    type="text"
                    name="username"
@@ -35,19 +26,19 @@ Administrator Login | QueueSathi
                    required>
 
             <label for="password">Password</label>
-
             <input id="password"
                    type="password"
                    name="password"
                    autocomplete="current-password"
                    required>
-            <button class="btn btn-primary auth-button">
-                Admin Login
+
+            <button type="submit" class="btn btn-primary auth-button">
+                Admin login
             </button>
 
         </form>
 
-    </div>
+    </section>
 
 </div>
 
