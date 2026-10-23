@@ -1,19 +1,14 @@
 {% extends "base.html" %}
 
-{% block title %}
-Track Token | QueueSathi
-{% endblock %}
+{% block title %}Track Token | QueueSathi{% endblock %}
 
 {% block content %}
 
-<div class="page-heading">
-
-    <h1>Track Your Token</h1>
-
-    <p>
-        Your queue information updates automatically.
-    </p>
-
+<div class="page-heading centered">
+    <span class="hero-badge">Live tracking</span>
+    <h1>Your queue token</h1>
+    <p>This page updates automatically. Keep it open while you wait.</p>
+    <span class="live-indicator">Live updates on</span>
 </div>
 
 
@@ -21,117 +16,88 @@ Track Token | QueueSathi
          id="token-status"
          data-public-id="{{ token['public_id'] }}">
 
-    <p class="muted">
-        {{ token['service_name'] }}
-    </p>
+    <span class="token-service">{{ token['service_name'] }}</span>
 
-    <div class="token-number">
-        {{ token['token_number'] }}
-    </div>
+    <div class="token-number">{{ token['token_number'] }}</div>
 
-    <div class="status-badge"
-         id="status">
+    <span class="status-badge status-{{ token['status']|lower }}" id="status">
         {{ token['status'] }}
-    </div>
+    </span>
 
+    {% set steps = ['WAITING', 'CALLED', 'SERVING', 'COMPLETED'] %}
+    {% set current = steps.index(token['status']) if token['status'] in steps else -1 %}
+
+    <ol class="progress-steps" aria-label="Token progress">
+        {% for step in steps %}
+            <li class="{% if loop.index0 < current %}done{% elif loop.index0 == current %}current{% endif %}"
+                {% if loop.index0 == current %}aria-current="step"{% endif %}>
+                {{ step }}
+            </li>
+        {% endfor %}
+    </ol>
 
     <div class="status-grid">
 
         <div class="stat-box">
-
-            <span>People Ahead</span>
-
-            <strong id="people-ahead">
-                {{ estimate['people_ahead'] }}
-            </strong>
-
+            <span>People ahead</span>
+            <strong id="people-ahead">{{ estimate['people_ahead'] }}</strong>
         </div>
 
-
         <div class="stat-box">
-
-            <span>Estimated Waiting Time</span>
-
+            <span>Estimated wait</span>
             <strong id="estimated-wait">
-
                 {% if estimate['estimated_minutes'] is none %}
-
                     Unavailable
-
                 {% else %}
-
                     {{ estimate['estimated_minutes'] }} min
-
                 {% endif %}
-
             </strong>
-
         </div>
 
     </div>
-
 
     <div class="tracking-information">
 
         <p>
             Estimate based on:
-
-            <strong id="estimate-source">
-                {{ estimate['estimate_source'] }}
-            </strong>
+            <strong id="estimate-source">{{ estimate['estimate_source'] }}</strong>
         </p>
 
-        <p class="muted">
-            Waiting-time estimates are approximate.
-            Actual times may vary.
-        </p>
+        <p>Waiting times are approximate and may change.</p>
 
-        <p class="muted">
+        <p>
             Last updated:
-
-            <span id="last-updated">
-                Just now
-            </span>
+            <span id="last-updated">Just now</span>
         </p>
 
-        <p id="refresh-error"
-           class="error-text"
-           role="status"></p>
+        <p id="refresh-error" class="error-text" role="status"></p>
 
     </div>
 
+    <div class="card-actions">
 
-    {% if token['status'] == 'WAITING' %}
+        {% if token['status'] == 'WAITING' %}
 
-        <form method="POST"
-              action="{{ url_for(
-                  'customer.cancel_token',
-                  public_id=token['public_id']
-              ) }}">
+            <form method="POST"
+                  action="{{ url_for('customer.cancel_token', public_id=token['public_id']) }}">
 
-            <input type="hidden"
-                   name="csrf_token"
-                   value="{{ csrf_token() }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-            <button type="submit"
-                    class="btn btn-danger"
-                    onclick="return confirm('Are you sure you want to cancel your token?')">
+                <button type="submit"
+                        class="btn btn-danger"
+                        onclick="return confirm('Are you sure you want to cancel your token?')">
+                    Cancel token
+                </button>
 
-                Cancel Token
+            </form>
 
-            </button>
+        {% endif %}
 
-        </form>
+        <a href="{{ url_for('customer.dashboard') }}" class="btn btn-secondary">
+            Back to dashboard
+        </a>
 
-    {% endif %}
-
-
-    <a href="{{ url_for('customer.dashboard') }}"
-       class="btn btn-secondary">
-
-        Back to Dashboard
-
-    </a>
+    </div>
 
 </section>
 
@@ -139,7 +105,5 @@ Track Token | QueueSathi
 
 
 {% block scripts %}
-
 <script src="{{ static_url('js/token-status.js') }}"></script>
-
 {% endblock %}
