@@ -10,31 +10,31 @@
     <meta name="description"
           content="{% block description %}QueueSathi is a smart digital queue system for campus services. Take a token online, track your place in the queue, and see an estimated waiting time.{% endblock %}">
 
-    <meta name="theme-color" content="#2563eb">
+    <meta name="theme-color" content="#0b1220">
 
-    <!-- Link previews (WhatsApp, Telegram, etc.) -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="QueueSathi - Smart Queue Management">
     <meta property="og:description"
           content="Join campus service queues digitally, track your token, and see your estimated wait.">
 
-    <!-- Inline favicon: avoids a /favicon.ico 404 request on every page -->
     <link rel="icon"
-          href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232563eb'/%3E%3Ctext x='32' y='44' font-size='36' font-family='Arial' font-weight='bold' text-anchor='middle' fill='white'%3EQ%3C/text%3E%3C/svg%3E">
+          href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2322d3ee'/%3E%3Ctext x='32' y='44' font-size='36' font-family='Arial' font-weight='bold' text-anchor='middle' fill='%230b1220'%3EQ%3C/text%3E%3C/svg%3E">
 
     <link rel="stylesheet" href="{{ static_url('css/style.css') }}">
 </head>
 
 <body>
 
+<div class="bg-orbs" aria-hidden="true"></div>
+
 <a href="#main-content" class="skip-link">Skip to main content</a>
 
 <header class="navbar">
-
     <div class="container nav-content">
 
         <a href="{{ url_for('customer.index') }}" class="brand">
-            Queue<span>Sathi</span>
+            <span class="brand-mark" aria-hidden="true">Q</span>
+            <span>Queue<span class="brand-accent">Sathi</span></span>
         </a>
 
         <nav aria-label="Main navigation">
@@ -83,7 +83,6 @@
         </nav>
 
     </div>
-
 </header>
 
 
@@ -105,7 +104,7 @@
 
 <footer class="footer">
     <div class="container">
-        QueueSathi © 2026 | Smart Digital Queue Management System
+        QueueSathi © 2026 · Smart Digital Queue Management System
     </div>
 </footer>
 
