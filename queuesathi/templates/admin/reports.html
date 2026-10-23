@@ -1,33 +1,30 @@
 {% extends "base.html" %}
 
-{% block title %}Reports | Ellora{% endblock %}
+{% block title %}Reports | QueueSathi{% endblock %}
 
 {% block content %}
 
 <div class="page-heading">
-
-    <h1>Queue Analytics</h1>
-
-    <p>
-        Operational statistics calculated from recorded tokens.
-    </p>
-
+    <span class="hero-badge">Analytics</span>
+    <h1>Queue analytics</h1>
+    <p>Calculated from recorded tokens. Times are in minutes.</p>
 </div>
 
-<section class="stats-grid">
+
+<section class="stats-grid stats-grid-4">
 
     <div class="stat-box">
-        <span>Total Tokens</span>
+        <span>Total tokens</span>
         <strong>{{ stats.total_tokens }}</strong>
     </div>
 
     <div class="stat-box">
-        <span>Total Served</span>
+        <span>Served</span>
         <strong>{{ stats.total_served }}</strong>
     </div>
 
     <div class="stat-box">
-        <span>Currently Waiting</span>
+        <span>Waiting now</span>
         <strong>{{ stats.total_waiting }}</strong>
     </div>
 
@@ -37,65 +34,64 @@
     </div>
 
     <div class="stat-box">
-        <span>Average Waiting Time</span>
-        <strong>{{ stats.average_wait }} min</strong>
+        <span>Average wait</span>
+        <strong>{{ stats.average_wait }} <small>min</small></strong>
     </div>
 
     <div class="stat-box">
-        <span>Average Service Duration</span>
-        <strong>{{ stats.average_service }} min</strong>
+        <span>Average service</span>
+        <strong>{{ stats.average_service }} <small>min</small></strong>
     </div>
 
     <div class="stat-box">
-        <span>Average Prediction Error</span>
-        <strong>{{ stats.prediction_error }} min</strong>
+        <span>Prediction error</span>
+        <strong>{{ stats.prediction_error }} <small>min</small></strong>
     </div>
 
 </section>
 
+
 <section class="card">
 
-    <h2>Busiest Hours</h2>
+    <h2>Busiest hours</h2>
+    <p class="muted">Arrivals by hour. Times are shown in UTC.</p>
 
-    <p class="muted">
-        Hours are shown in UTC.
-    </p>
+    {% if stats.busy_hours %}
 
-    <table>
+        {% set peak = stats.busy_hours|map(attribute='total')|max %}
 
-        <thead>
-            <tr>
-                <th>Hour</th>
-                <th>Arrivals</th>
-            </tr>
-        </thead>
-
-        <tbody>
+        <div class="bar-chart" role="list">
 
             {% for row in stats.busy_hours %}
+                <div class="bar-row" role="listitem">
+                    <span class="bar-label">{{ row['hour'] }}:00</span>
 
-            <tr>
-                <td>{{ row['hour'] }}:00</td>
-                <td>{{ row['total'] }}</td>
-            </tr>
+                    <div class="bar-track" aria-hidden="true">
+                        <div class="bar-fill"
+                             style="width: {{ (row['total'] / peak * 100)|round(1) }}%"></div>
+                    </div>
 
-            {% else %}
-
-            <tr>
-                <td colspan="2">
-                    No data available.
-                </td>
-            </tr>
-
+                    <span class="bar-value">
+                        {{ row['total'] }}
+                        <span class="visually-hidden">arrivals</span>
+                    </span>
+                </div>
             {% endfor %}
 
-        </tbody>
+        </div>
 
-    </table>
+    {% else %}
 
-    <p class="muted">
+        <div class="empty-state">
+            <span class="empty-icon" aria-hidden="true">📊</span>
+            <p>No data yet. Statistics appear after tokens are created.</p>
+        </div>
+
+    {% endif %}
+
+    <p class="muted" style="margin-top: 24px;">
         These statistics describe recorded activity only.
-        They do not prove that waiting time has decreased.
+        They do not prove that waiting times have changed.
     </p>
 
 </section>
