@@ -1,36 +1,51 @@
 {% extends "base.html" %}
 
-{% block title %}
-Student Login | QueueSathi
-{% endblock %}
+{% block title %}Student Login | QueueSathi{% endblock %}
 
 {% block content %}
 
-<div class="auth-container">
+<div class="auth-split">
 
-    <div class="auth-header">
+    <section class="auth-panel-brand" aria-labelledby="welcome-heading">
 
-        <h1>Welcome to QueueSathi</h1>
+        <span class="hero-badge-light">Smart Campus Queues</span>
+
+        <h1 id="welcome-heading">Know your turn.<br>Skip the wait.</h1>
 
         <p>
-            Smart Digital Queue & Waiting-Time Management System
+            Take a digital token, track your place in line, and see an
+            estimated waiting time from anywhere on campus.
         </p>
 
-    </div>
+        <ul class="feature-list">
+            <li>
+                <span class="feature-icon" aria-hidden="true">🎟️</span>
+                Digital tokens in seconds
+            </li>
+            <li>
+                <span class="feature-icon" aria-hidden="true">📍</span>
+                Live queue position
+            </li>
+            <li>
+                <span class="feature-icon" aria-hidden="true">⏱️</span>
+                Estimated waiting time
+            </li>
+        </ul>
 
-    <div class="card auth-card">
+    </section>
 
-        <h2>Student Login</h2>
+    <section class="card auth-card auth-panel-form">
 
-        <form method="POST"
-              action="{{ url_for('auth.student_login') }}">
+        <div class="auth-header">
+            <h2>Student login</h2>
+            <p>Sign in to manage your tokens.</p>
+        </div>
 
-            <input type="hidden"
-                   name="csrf_token"
-                   value="{{ csrf_token() }}">
-            
+        <form method="POST" action="{{ url_for('auth.student_login') }}">
+
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
             <label for="username">Username</label>
-
             <input id="username"
                    type="text"
                    name="username"
@@ -39,7 +54,6 @@ Student Login | QueueSathi
                    required>
 
             <label for="password">Password</label>
-
             <input id="password"
                    type="password"
                    name="password"
@@ -47,44 +61,32 @@ Student Login | QueueSathi
                    autocomplete="current-password"
                    required>
 
-            <button type="submit"
-                    class="btn btn-primary auth-button">
-                Login as Student
+            <button type="submit" class="btn btn-primary auth-button">
+                Login as student
             </button>
 
         </form>
 
         <p class="auth-footer">
-
-            Don't have an account?
-
-            <a href="{{ url_for('auth.student_register') }}">
-                Register
-            </a>
-
+            New here?
+            <a href="{{ url_for('auth.student_register') }}">Create an account</a>
         </p>
 
         <hr class="auth-divider">
 
         <div class="other-logins">
+            <p class="muted">Are you a staff member or administrator?</p>
 
-            <p class="muted">
-                Are you a staff member or administrator?
-            </p>
-
-            <a href="{{ url_for('auth.staff_select') }}"
-               class="btn btn-secondary">
-                Staff Login
+            <a href="{{ url_for('auth.staff_select') }}" class="btn btn-secondary">
+                Staff login
             </a>
 
-            <a href="{{ url_for('auth.admin_login') }}"
-               class="btn btn-secondary">
-                Admin Login
+            <a href="{{ url_for('auth.admin_login') }}" class="btn btn-secondary">
+                Admin login
             </a>
-
         </div>
 
-    </div>
+    </section>
 
 </div>
 
