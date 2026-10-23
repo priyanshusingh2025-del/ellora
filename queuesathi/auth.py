@@ -28,6 +28,10 @@ def load_current_account():
     g.user = None
     g.student = None
 
+    # Static files and the health check never need the logged-in account.
+    if request.endpoint in ("static", "health_check"):
+        return
+
     user_id = session.get("user_id")
     student_id = session.get("student_id")
 
@@ -83,9 +87,11 @@ def role_required(*roles):
                 abort(403)
 
             if not g.user:
-                return redirect(
-                    url_for("auth.staff_select")
-                )
+                # Admin-only pages send visitors to the admin login.
+                if roles == ("ADMIN",):
+                    return redirect(url_for("auth.admin_login"))
+
+                return redirect(url_for("auth.staff_select"))
 
             if g.user["role"] not in roles:
                 abort(403)
