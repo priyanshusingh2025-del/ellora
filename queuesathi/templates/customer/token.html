@@ -140,9 +140,6 @@ Track Token | QueueSathi
 
 {% block scripts %}
 
-<script src="{{ url_for(
-    'static',
-    filename='js/token-status.js'
-) }}"></script>
+<script src="{{ static_url('js/token-status.js') }}"></script>
 
 {% endblock %}

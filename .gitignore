@@ -1,12 +1,25 @@
+# Secrets
 .env
-.env.vercel
+.env.*
+!.env.example
+
+# Local database
+instance/*.sqlite3
+instance/*.db
+instance/*.sqlite3-wal
+instance/*.sqlite3-shm
+
+# Python
 .venv/
 venv/
 __pycache__/
 *.pyc
 .pytest_cache/
-instance/*.sqlite3
-instance/*.db
-instance/*.sqlite3-wal
-instance/*.sqlite3-shm
+
+# Old Vercel files (kept ignored in case the CLI recreates them)
+.vercel
+
+# OS / editor
 .DS_Store
+.vscode/
+.idea/

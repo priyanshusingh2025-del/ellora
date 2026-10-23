@@ -1,17 +1,48 @@
 import sqlite3
+import threading
 
 from flask import current_app, g
 
 try:
     import psycopg
     from psycopg.rows import dict_row
-except ImportError:  # psycopg is only required when DATABASE_URL is set
+    from psycopg_pool import ConnectionPool
+except ImportError:  # only required when DATABASE_URL is set
     psycopg = None
+    ConnectionPool = None
 
 
 # =========================================================
-# PostgreSQL compatibility wrapper
+# PostgreSQL connection pool (one per Gunicorn worker)
 # =========================================================
+
+_pool = None
+_pool_lock = threading.Lock()
+
+
+def _get_pool(url):
+    """Create the pool on first use, inside the worker process."""
+    global _pool
+
+    if _pool is None:
+        with _pool_lock:
+            if _pool is None:
+                _pool = ConnectionPool(
+                    conninfo=url,
+                    min_size=1,
+                    max_size=4,          # matches --threads 4 in render.yaml
+                    max_idle=240,        # drop idle connections before Neon does
+                    kwargs={
+                        "row_factory": dict_row,
+                        "connect_timeout": 10,
+                        "prepare_threshold": None,  # required for Neon's pooler
+                    },
+                    check=ConnectionPool.check_connection,  # replace dead connections
+                    open=True,
+                )
+
+    return _pool
+
 
 class _NullCursor:
     """Returned for SQLite-only statements (PRAGMA) that PostgreSQL ignores."""
@@ -25,7 +56,7 @@ class _NullCursor:
 
 class PostgresConnection:
     """
-    Lets the existing QueueSathi code (written for sqlite3) run on PostgreSQL:
+    Lets the existing sqlite3-style code run on PostgreSQL:
       - converts ? placeholders to %s
       - ignores PRAGMA statements
       - turns BEGIN IMMEDIATE into a table lock so tokens are issued safely
@@ -33,17 +64,13 @@ class PostgresConnection:
     """
 
     def __init__(self, url):
-        if psycopg is None:
+        if ConnectionPool is None:
             raise RuntimeError(
-                "psycopg is not installed. Run: pip install -r requirements.txt"
+                "PostgreSQL packages missing. Run: pip install -r requirements.txt"
             )
 
-        self._conn = psycopg.connect(
-            url,
-            row_factory=dict_row,
-            connect_timeout=10,
-            prepare_threshold=None,  # required for pooled (PgBouncer) connections
-        )
+        self._pool = _get_pool(url)
+        self._conn = self._pool.getconn(timeout=15)
 
     @staticmethod
     def _translate(sql):
@@ -53,7 +80,6 @@ class PostgresConnection:
             return None
 
         if upper.startswith("BEGIN IMMEDIATE"):
-            # Serialises queue changes, like SQLite's BEGIN IMMEDIATE.
             return "LOCK TABLE tokens IN SHARE ROW EXCLUSIVE MODE"
 
         return sql.replace("?", "%s")
@@ -76,7 +102,9 @@ class PostgresConnection:
         self._conn.rollback()
 
     def close(self):
-        self._conn.close()
+        # Return the connection to the pool instead of closing it.
+        # The pool rolls back any unfinished transaction automatically.
+        self._pool.putconn(self._conn)
 
 
 # =========================================================
@@ -131,7 +159,6 @@ def init_db():
     with current_app.open_resource("schema.sql") as file:
         db.executescript(file.read().decode("utf-8"))
 
-    # Upgrade databases created by older QueueSathi versions.
     if not column_exists(db, "users", "service_id"):
         db.execute(
             "ALTER TABLE users ADD COLUMN service_id INTEGER REFERENCES services(id)"
@@ -150,7 +177,6 @@ def init_db():
         "CREATE INDEX IF NOT EXISTS idx_tokens_queue_order "
         "ON tokens(service_id, queue_order)"
     )
-
     db.execute(
         "CREATE INDEX IF NOT EXISTS idx_tokens_student ON tokens(student_id)"
     )

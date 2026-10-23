@@ -298,9 +298,6 @@ Staff Dashboard | QueueSathi
 
 {% block scripts %}
 
-<script src="{{ url_for(
-    'static',
-    filename='js/staff-dashboard.js'
-) }}"></script>
+<script src="{{ static_url('js/staff-dashboard.js') }}"></script>
 
 {% endblock %}

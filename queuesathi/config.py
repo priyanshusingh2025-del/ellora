@@ -11,7 +11,7 @@ class Config:
     DEBUG = os.getenv("FLASK_DEBUG", "0") == "1"
 
     # If set, PostgreSQL is used. If empty, local SQLite is used.
-    DATABASE_URL = os.getenv("DATABASE_URL") or os.getenv("POSTGRES_URL")
+    DATABASE_URL = os.getenv("DATABASE_URL")
 
     REFRESH_INTERVAL = 10000
 
@@ -20,7 +20,10 @@ class Config:
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
 
-    # Vercel sets VERCEL=1 automatically. Cookies are HTTPS-only there.
-    SESSION_COOKIE_SECURE = os.getenv("VERCEL") == "1"
+    # Render sets RENDER=true automatically. Cookies are HTTPS-only there.
+    SESSION_COOKIE_SECURE = os.getenv("RENDER") == "true"
 
     WTF_CSRF_ENABLED = True
+        # Browsers cache CSS/JS for 1 year. This is safe because static_url()
+    # adds a version number that changes whenever a file changes.
+    SEND_FILE_MAX_AGE_DEFAULT = 31536000
