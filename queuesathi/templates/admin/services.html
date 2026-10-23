@@ -25,18 +25,21 @@
                name="csrf_token"
                value="{{ csrf_token() }}">
 
-        <label>Service Name</label>
+        <label for="new-service-name">Service Name</label>
 
-        <input name="service_name"
+        <input id="new-service-name"
+               name="service_name"
                placeholder="Library Help Desk"
                required>
 
-        <label>Service Code</label>
+        <label for="new-service-code">Service Code</label>
 
-        <input name="service_code"
+        <input id="new-service-code"
+               name="service_code"
                placeholder="LIB"
                maxlength="10"
                required>
+
 
         <button class="btn btn-primary">
             Add Service
@@ -100,6 +103,7 @@
 
                             <input name="service_name"
                                    value="{{ service['service_name'] }}"
+                                   aria-label="New name for {{ service['service_name'] }}"
                                    required>
 
                             <button class="btn btn-small">
