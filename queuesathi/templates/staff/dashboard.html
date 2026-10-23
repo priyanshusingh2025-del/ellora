@@ -1,56 +1,76 @@
 {% extends "base.html" %}
 
-{% block title %}
-Staff Dashboard | QueueSathi
-{% endblock %}
-
-{% macro action_button(token, action, label) %}
-
-<form
-    method="POST"
-    class="inline-form"
-    action="{{ url_for(
-        'staff.token_action',
-        token_id=token['id'],
-        action=action
-    ) }}"
->
-
-    <input
-        type="hidden"
-        name="csrf_token"
-        value="{{ csrf_token() }}"
-    >
-
-    <button class="btn btn-small btn-secondary">
-        {{ label }}
-    </button>
-
-</form>
-
-{% endmacro %}
-
+{% block title %}Staff Dashboard | QueueSathi{% endblock %}
 
 {% block content %}
 
+{% macro action_button(token, action, label, style='btn-secondary') %}
+    <form method="POST"
+          class="inline-form"
+          action="{{ url_for('staff.token_action', token_id=token['id'], action=action) }}">
+
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <button type="submit" class="btn btn-small {{ style }}">
+            {{ label }}
+        </button>
+    </form>
+{% endmacro %}
+
+
+{% set active = tokens|selectattr('status', 'in', ['CALLED', 'SERVING'])|first %}
+{% set waiting_count = tokens|selectattr('status', 'equalto', 'WAITING')|list|length %}
+{% set hold_count = tokens|selectattr('status', 'equalto', 'HOLD')|list|length %}
+{% set serving_count = tokens|selectattr('status', 'in', ['CALLED', 'SERVING'])|list|length %}
+
+
 <div class="page-heading">
+    <span class="hero-badge">
+        {% if g.user['role'] == 'STAFF' %}Department queue{% else %}Queue overview{% endif %}
+    </span>
+    <h1>Staff dashboard</h1>
+    <p>
+        {% if g.user['role'] == 'STAFF' %}
+            Signed in as {{ g.user['username'] }}. Manage your assigned queue.
+        {% else %}
+            Viewing every department as administrator.
+        {% endif %}
+    </p>
+</div>
 
-    <h1>Staff Dashboard</h1>
 
-    {% if g.user['role'] == 'STAFF' %}
-
-        <p>
-            Manage your assigned service queue.
-        </p>
-
-    {% else %}
-
-        <p>
-            Administrator Queue Overview
-        </p>
-
+<section class="now-serving {% if not active %}is-idle{% endif %}" aria-live="polite">
+    <div>
+        <p class="label">Now serving</p>
+        {% if active %}
+            <p class="value">{{ active['token_number'] }}</p>
+        {% else %}
+            <p class="value-muted">No one is being served right now</p>
+        {% endif %}
+    </div>
+    {% if active %}
+        <span class="status-badge status-{{ active['status']|lower }}">{{ active['status'] }}</span>
     {% endif %}
+</section>
 
+
+<div class="stats-grid">
+    <div class="stat-box">
+        <span>Tokens in queue</span>
+        <strong>{{ tokens|length }}</strong>
+    </div>
+    <div class="stat-box">
+        <span>Waiting</span>
+        <strong>{{ waiting_count }}</strong>
+    </div>
+    <div class="stat-box">
+        <span>Called / serving</span>
+        <strong>{{ serving_count }}</strong>
+    </div>
+    <div class="stat-box">
+        <span>On hold</span>
+        <strong>{{ hold_count }}</strong>
+    </div>
 </div>
 
 
@@ -58,36 +78,21 @@ Staff Dashboard | QueueSathi
 
     <section class="card">
 
-        <h2>Call Next Token</h2>
+        <h2>Call next token</h2>
+        <p class="muted">Calls the oldest waiting token in the selected queue.</p>
 
-        <form
-            method="POST"
-            action="{{ url_for('staff.call_next_route') }}"
-        >
+        <form method="POST" action="{{ url_for('staff.call_next_route') }}">
 
-            <input
-                type="hidden"
-                name="csrf_token"
-                value="{{ csrf_token() }}"
-            >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-            <label for="call-service">Select Service</label>
-
+            <label for="call-service">Service</label>
             <select id="call-service" name="service_id" required>
-
                 {% for service in services %}
-
-                <option value="{{ service['id'] }}">
-                    {{ service['service_name'] }}
-                </option>
-
+                    <option value="{{ service['id'] }}">{{ service['service_name'] }}</option>
                 {% endfor %}
-
             </select>
 
-            <button class="btn btn-primary">
-                Call Next
-            </button>
+            <button type="submit" class="btn btn-primary btn-block">Call next</button>
 
         </form>
 
@@ -96,40 +101,23 @@ Staff Dashboard | QueueSathi
 
     <section class="card">
 
-        <h2>Register Walk-in</h2>
+        <h2>Register walk-in</h2>
+        <p class="muted">Adds a person who arrived without using the app.</p>
 
-        <form
-            method="POST"
-            action="{{ url_for('staff.walk_in') }}"
-        >
+        <form method="POST" action="{{ url_for('staff.walk_in') }}">
 
-            <input
-                type="hidden"
-                name="csrf_token"
-                value="{{ csrf_token() }}"
-            >
-            <label for="walkin-service">Select Service</label>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
+            <label for="walkin-service">Service</label>
             <select id="walkin-service" name="service_id" required>
-
-
                 {% for service in services %}
-
                     {% if service['is_open'] %}
-
-                    <option value="{{ service['id'] }}">
-                        {{ service['service_name'] }}
-                    </option>
-
+                        <option value="{{ service['id'] }}">{{ service['service_name'] }}</option>
                     {% endif %}
-
                 {% endfor %}
-
             </select>
 
-            <button class="btn btn-secondary">
-                Add Walk-in
-            </button>
+            <button type="submit" class="btn btn-secondary btn-block">Add walk-in</button>
 
         </form>
 
@@ -138,157 +126,92 @@ Staff Dashboard | QueueSathi
 </div>
 
 
-<section class="card">
+<section class="card" style="margin-top: 22px;">
 
-    <h2>Active Queue</h2>
-
-    <p class="muted">
-        Tokens are displayed in their actual queue order.
-    </p>
+    <div class="section-heading">
+        <div>
+            <h2>Active queue</h2>
+            <p class="muted">In serving order. Refreshes every 10 seconds.</p>
+        </div>
+        <span class="live-indicator">Live</span>
+    </div>
 
     <div class="table-wrapper">
-
         <table>
-
+            <caption class="visually-hidden">Active tokens in serving order</caption>
             <thead>
-
                 <tr>
-                    <th>Token</th>
-                    <th>Service</th>
-                    <th>Status</th>
-                    <th>Source</th>
-                    <th>Actions</th>
+                    <th scope="col">Token</th>
+                    <th scope="col">Service</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Source</th>
+                    <th scope="col">Actions</th>
                 </tr>
-
             </thead>
-
             <tbody>
 
                 {% for token in tokens %}
-
                 <tr>
 
-                    <td>
-                        <strong>
-                            {{ token['token_number'] }}
-                        </strong>
-                    </td>
+                    <td><strong>{{ token['token_number'] }}</strong></td>
+
+                    <td>{{ token['service_name'] }}</td>
 
                     <td>
-                        {{ token['service_name'] }}
-                    </td>
-
-                    <td>
-                        <span class="status-badge">
+                        <span class="status-badge status-{{ token['status']|lower }}">
                             {{ token['status'] }}
                         </span>
                     </td>
 
-                    <td>
-                        {{ token['source'] }}
-                    </td>
+                    <td>{{ token['source']|replace('_', ' ')|title }}</td>
 
                     <td class="actions">
 
                         {% if token['status'] == 'CALLED' %}
 
-                            {{ action_button(
-                                token,
-                                'serve',
-                                'Start Serving'
-                            ) }}
+                            {{ action_button(token, 'serve', 'Start serving', 'btn-primary') }}
 
-                            <form
-                                method="POST"
-                                class="inline-form"
-                                action="{{ url_for(
-                                    'staff.skip_token_route',
-                                    token_id=token['id']
-                                ) }}"
-                            >
+                            <form method="POST"
+                                  class="inline-form"
+                                  action="{{ url_for('staff.skip_token_route', token_id=token['id']) }}">
 
-                                <input
-                                    type="hidden"
-                                    name="csrf_token"
-                                    value="{{ csrf_token() }}"
-                                >
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-                                <button
-                                    class="btn btn-small btn-warning"
-                                >
-                                    Skip Token
+                                <button type="submit" class="btn btn-small btn-warning">
+                                    Skip
                                 </button>
-
                             </form>
 
-                            {{ action_button(
-                                token,
-                                'no-show',
-                                'No-show'
-                            ) }}
-
-                            {{ action_button(
-                                token,
-                                'cancel',
-                                'Cancel'
-                            ) }}
+                            {{ action_button(token, 'no-show', 'No-show', 'btn-danger') }}
+                            {{ action_button(token, 'cancel', 'Cancel', 'btn-danger') }}
 
                         {% elif token['status'] == 'SERVING' %}
 
-                            {{ action_button(
-                                token,
-                                'complete',
-                                'Complete'
-                            ) }}
-
-                            {{ action_button(
-                                token,
-                                'hold',
-                                'Hold'
-                            ) }}
+                            {{ action_button(token, 'complete', 'Complete', 'btn-primary') }}
+                            {{ action_button(token, 'hold', 'Hold', 'btn-secondary') }}
 
                         {% elif token['status'] == 'HOLD' %}
 
-                            {{ action_button(
-                                token,
-                                'resume',
-                                'Resume Waiting'
-                            ) }}
-
-                            {{ action_button(
-                                token,
-                                'cancel',
-                                'Cancel'
-                            ) }}
+                            {{ action_button(token, 'resume', 'Resume waiting', 'btn-secondary') }}
+                            {{ action_button(token, 'cancel', 'Cancel', 'btn-danger') }}
 
                         {% elif token['status'] == 'WAITING' %}
 
-                            {{ action_button(
-                                token,
-                                'cancel',
-                                'Cancel'
-                            ) }}
+                            {{ action_button(token, 'cancel', 'Cancel', 'btn-danger') }}
 
                         {% endif %}
 
                     </td>
 
                 </tr>
-
                 {% else %}
-
                 <tr>
-                    <td colspan="5">
-                        No active tokens.
-                    </td>
+                    <td colspan="5">No active tokens in this queue.</td>
                 </tr>
-
                 {% endfor %}
 
             </tbody>
-
         </table>
-
     </div>
 
 </section>
@@ -297,7 +220,5 @@ Staff Dashboard | QueueSathi
 
 
 {% block scripts %}
-
 <script src="{{ static_url('js/staff-dashboard.js') }}"></script>
-
 {% endblock %}
