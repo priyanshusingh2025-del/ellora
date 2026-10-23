@@ -1,18 +1,14 @@
 {% extends "base.html" %}
 
+{% block title %}Access Denied | QueueSathi{% endblock %}
+
 {% block content %}
 
-<section class="card">
-
-    <h1>Access Denied</h1>
-
-    <p>You do not have permission to access this page.</p>
-
-    <a href="{{ url_for('customer.index') }}"
-       class="btn btn-primary">
-        Return Home
-    </a>
-
+<section class="card error-card">
+    <p class="error-code">403</p>
+    <h1>Access denied</h1>
+    <p class="muted">You do not have permission to open this page.</p>
+    <a href="{{ url_for('customer.index') }}" class="btn btn-primary">Return home</a>
 </section>
 
 {% endblock %}
